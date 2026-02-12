@@ -1,0 +1,286 @@
+/* Point Cloud Annotator Styles */
+
+/* Annotation Dialog */
+.annotation-dialog {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+}
+
+.annotation-dialog.hidden {
+    display: none;
+}
+
+.annotation-dialog-content {
+    background: #2a2a2a;
+    border-radius: 8px;
+    padding: 24px;
+    min-width: 350px;
+    max-width: 450px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    color: #fff;
+}
+
+.annotation-dialog-content h3 {
+    margin: 0 0 20px 0;
+    font-size: 18px;
+    font-weight: 500;
+    color: #fff;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 13px;
+    color: #aaa;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #444;
+    border-radius: 4px;
+    background: #1a1a1a;
+    color: #fff;
+    font-size: 14px;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #4a9eff;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: #666;
+}
+
+.dialog-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background: #4a9eff;
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background: #3a8eef;
+}
+
+.btn-primary:disabled {
+    background: #666;
+    cursor: not-allowed;
+}
+
+.btn-secondary {
+    background: #444;
+    color: #fff;
+}
+
+.btn-secondary:hover {
+    background: #555;
+}
+
+/* Toolbar */
+.annotation-toolbar {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 8px;
+    z-index: 1000;
+}
+
+.toolbar-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    background: rgba(42, 42, 42, 0.9);
+    border: 1px solid #444;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.toolbar-btn:hover {
+    background: rgba(74, 158, 255, 0.2);
+    border-color: #4a9eff;
+}
+
+.toolbar-btn.active {
+    background: rgba(74, 158, 255, 0.3);
+    border-color: #4a9eff;
+    color: #4a9eff;
+}
+
+.toolbar-btn svg {
+    flex-shrink: 0;
+}
+
+/* Status Bar */
+.status-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 30px;
+    background: rgba(26, 26, 26, 0.95);
+    border-top: 1px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 15px;
+    z-index: 1000;
+    font-size: 12px;
+    color: #aaa;
+}
+
+#status-message {
+    flex: 1;
+}
+
+#status-message.success {
+    color: #4caf50;
+}
+
+#status-message.error {
+    color: #f44336;
+}
+
+#annotation-count {
+    color: #4a9eff;
+}
+
+/* Custom Annotation Styles */
+.annotation-custom {
+    cursor: pointer;
+}
+
+.annotation-custom .annotation-titlebar {
+    position: relative;
+}
+
+.annotation-delete-btn {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #f44336;
+    border: none;
+    color: white;
+    font-size: 14px;
+    line-height: 1;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    transition: transform 0.2s;
+}
+
+.annotation-delete-btn:hover {
+    transform: scale(1.1);
+    background: #d32f2f;
+}
+
+.annotation-custom:hover .annotation-delete-btn {
+    display: flex;
+}
+
+/* Annotation marker indicator */
+.annotation-marker {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: #4a9eff;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    pointer-events: none;
+}
+
+/* Edit mode indicator */
+.edit-mode-indicator {
+    position: fixed;
+    top: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(74, 158, 255, 0.9);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+    z-index: 1000;
+    display: none;
+}
+
+.edit-mode-indicator.visible {
+    display: block;
+}
+
+/* Loading spinner */
+.loading-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #444;
+    border-top: 2px solid #4a9eff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: 8px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .annotation-dialog-content {
+        min-width: 280px;
+        margin: 20px;
+    }
+    
+    .annotation-toolbar {
+        flex-direction: column;
+    }
+    
+    .toolbar-btn span {
+        display: none;
+    }
+}
