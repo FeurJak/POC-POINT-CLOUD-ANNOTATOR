@@ -131,8 +131,16 @@ function hideDialog() {
  * Create a Potree annotation from API data
  */
 function createPotreeAnnotation(annotationData) {
+    const position = new THREE.Vector3(annotationData.x, annotationData.y, annotationData.z);
+    
+    // Calculate a camera position that looks at this annotation
+    const cameraOffset = new THREE.Vector3(2, -2, 2);
+    const cameraPosition = position.clone().add(cameraOffset);
+    
     const annotation = new Potree.Annotation({
-        position: [annotationData.x, annotationData.y, annotationData.z],
+        position: position,
+        cameraPosition: cameraPosition,
+        cameraTarget: position.clone(),
         title: annotationData.title,
         description: annotationData.description || '',
     });
@@ -266,7 +274,9 @@ function toggleAddMode() {
     
     if (state.isAddingAnnotation) {
         elements.addButton.classList.add('active');
-        setStatus('Click on the point cloud to add an annotation');
+        setStatus('Drag on the point cloud to place an annotation, then release');
+        // Start the insertion process
+        startAnnotationInsertion();
     } else {
         elements.addButton.classList.remove('active');
         setStatus('Ready');
@@ -274,46 +284,65 @@ function toggleAddMode() {
 }
 
 /**
- * Handle click on point cloud for adding annotations
+ * Start annotation insertion using Potree's built-in annotation tool
  */
-function handlePointCloudClick(event) {
+function startAnnotationInsertion() {
     if (!state.isAddingAnnotation) {
         return;
     }
 
-    const mouse = new THREE.Vector2();
-    const rect = viewer.renderer.domElement.getBoundingClientRect();
-    mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-    mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-
-    // Get intersection with point cloud
-    const intersection = Potree.Utils.getMousePointCloudIntersection(
-        mouse,
-        viewer.scene.getActiveCamera(),
-        viewer,
-        viewer.scene.pointclouds,
-        { pickClipped: true }
-    );
-
-    if (intersection) {
-        state.pendingPosition = {
-            x: intersection.location.x,
-            y: intersection.location.y,
-            z: intersection.location.z,
-        };
-        
-        // Exit add mode and show dialog
-        toggleAddMode();
-        showDialog('Create Annotation');
-    } else {
-        setStatus('No point detected at click location', 'error');
-    }
+    // Use Potree's built-in annotation tool
+    const annotationTool = viewer.annotationTool;
+    const tempAnnotation = annotationTool.startInsertion();
+    
+    // Listen for when the annotation is placed (on mouseup)
+    const domElement = viewer.renderer.domElement;
+    
+    const onMouseUp = (e) => {
+        if (e.button === 0) { // Left click
+            // Get the position from the temp annotation
+            const position = tempAnnotation.position;
+            
+            if (position && (position.x !== 0 || position.y !== 0 || position.z !== 0)) {
+                // Remove the temp annotation (we'll create our own)
+                viewer.scene.annotations.remove(tempAnnotation);
+                
+                // Store the position
+                state.pendingPosition = {
+                    x: position.x,
+                    y: position.y,
+                    z: position.z,
+                };
+                
+                // Exit add mode and show dialog
+                toggleAddMode();
+                showDialog('Create Annotation');
+            } else {
+                // No valid position, remove temp annotation
+                viewer.scene.annotations.remove(tempAnnotation);
+                setStatus('No point detected - try clicking directly on the point cloud', 'error');
+            }
+            
+            domElement.removeEventListener('mouseup', onMouseUp);
+        } else if (e.button === 2) { // Right click - cancel
+            viewer.scene.annotations.remove(tempAnnotation);
+            domElement.removeEventListener('mouseup', onMouseUp);
+            setStatus('Annotation cancelled', 'info');
+        }
+    };
+    
+    domElement.addEventListener('mouseup', onMouseUp);
 }
 
 /**
  * Initialize the Potree viewer
  */
 function initViewer() {
+    // Set Potree paths - use build/potree/resources path which nginx rewrites to actual location
+    const origin = window.location.origin;
+    Potree.resourcePath = origin + "/potree/build/potree/resources";
+    Potree.scriptPath = origin + "/potree/build/potree";
+    
     window.viewer = new Potree.Viewer(document.getElementById("potree_render_area"));
 
     viewer.setEDLEnabled(true);
@@ -344,16 +373,17 @@ function initViewer() {
         viewer.scene.view.position.set(4.15, -6.12, 8.54);
         viewer.scene.view.lookAt(new THREE.Vector3(0, -0.098, 4.23));
         
-        // Configure point cloud material
+        // Configure point cloud material - larger points are easier to click
         e.pointcloud.material.pointSizeType = Potree.PointSizeType.ADAPTIVE;
-        e.pointcloud.material.size = 1;
+        e.pointcloud.material.size = 2;  // Increased from 1 for easier clicking
+        e.pointcloud.material.minSize = 2;
+        
+        // Store reference for picking
+        window.pointcloud = e.pointcloud;
 
         // Load existing annotations after point cloud is loaded
         loadAnnotations();
     });
-
-    // Add click handler for adding annotations
-    viewer.renderer.domElement.addEventListener('click', handlePointCloudClick);
 }
 
 /**
