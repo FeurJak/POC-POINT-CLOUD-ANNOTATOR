@@ -1,5 +1,7 @@
 # Point Cloud Annotator
 
+![Screenshot](./assets/screenshot.png)
+
 A web application for loading, viewing, and annotating 3D point clouds with persistent storage.
 
 ## Features
@@ -79,12 +81,12 @@ flowchart LR
         direction TB
         Main["cmd/main.go"]
         Config["config/"]
-        
+
         subgraph Modes["Runtime Modes"]
             GatewayMode["Gateway Mode<br/>-role gateway"]
             HandlerMode["Handler Mode<br/>-role handler"]
         end
-        
+
         subgraph Packages["Internal Packages"]
             GatewayPkg["gateway/<br/>HTTP Proxy"]
             HandlerPkg["handler/<br/>Gin Routes"]
@@ -124,33 +126,34 @@ erDiagram
 
 The backend is a **single Go binary** that runs in different modes based on the `-role` flag:
 
-| Mode | Flag | Port | Description |
-|------|------|------|-------------|
-| Gateway | `-role gateway` | 8080 | HTTP reverse proxy that routes requests to handler services |
+| Mode    | Flag            | Port | Description                                                  |
+| ------- | --------------- | ---- | ------------------------------------------------------------ |
+| Gateway | `-role gateway` | 8080 | HTTP reverse proxy that routes requests to handler services  |
 | Handler | `-role handler` | 8081 | Processes annotation CRUD operations with database and cache |
 
 **Technology Stack:**
 
-| Component | Technology | Purpose |
-|-----------|------------|---------|
-| Dependency Injection | [Uber Fx](https://github.com/uber-go/fx) | Lifecycle management, modular architecture |
-| HTTP Framework | [Gin](https://github.com/gin-gonic/gin) | Fast HTTP routing and middleware |
-| Database Driver | [pgx](https://github.com/jackc/pgx) | Native PostgreSQL driver with connection pooling |
-| Cache Client | [go-redis](https://github.com/redis/go-redis) | Redis client with automatic reconnection |
-| Logging | [Zap](https://github.com/uber-go/zap) | Structured, leveled logging |
+| Component            | Technology                                    | Purpose                                          |
+| -------------------- | --------------------------------------------- | ------------------------------------------------ |
+| Dependency Injection | [Uber Fx](https://github.com/uber-go/fx)      | Lifecycle management, modular architecture       |
+| HTTP Framework       | [Gin](https://github.com/gin-gonic/gin)       | Fast HTTP routing and middleware                 |
+| Database Driver      | [pgx](https://github.com/jackc/pgx)           | Native PostgreSQL driver with connection pooling |
+| Cache Client         | [go-redis](https://github.com/redis/go-redis) | Redis client with automatic reconnection         |
+| Logging              | [Zap](https://github.com/uber-go/zap)         | Structured, leveled logging                      |
 
 ### Frontend
 
 The frontend is served by Nginx and consists of:
 
-| Component | File | Description |
-|-----------|------|-------------|
-| HTML | `index.html` | Main page with Potree container and annotation UI |
-| JavaScript | `js/annotator.js` | ES module handling annotation CRUD and Potree integration |
-| CSS | `css/annotator.css` | Custom styles for annotation toolbar and dialogs |
-| Nginx Config | `nginx.conf` | Reverse proxy for API, static file serving, path rewrites |
+| Component    | File                | Description                                               |
+| ------------ | ------------------- | --------------------------------------------------------- |
+| HTML         | `index.html`        | Main page with Potree container and annotation UI         |
+| JavaScript   | `js/annotator.js`   | ES module handling annotation CRUD and Potree integration |
+| CSS          | `css/annotator.css` | Custom styles for annotation toolbar and dialogs          |
+| Nginx Config | `nginx.conf`        | Reverse proxy for API, static file serving, path rewrites |
 
 **Key Frontend Features:**
+
 - Uses Potree's built-in `annotationTool.startInsertion()` for precise point placement
 - ES Modules with THREE.js for 3D coordinate handling
 - Real-time status updates and error handling
@@ -169,6 +172,7 @@ docker compose up -d
 ```
 
 Access the application:
+
 - **Frontend**: http://localhost:3000
 - **API Gateway**: http://localhost:8080
 
@@ -193,17 +197,18 @@ make run-gateway  # In terminal 2
 
 All endpoints are prefixed with `/api/v1`
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/annotations` | List all annotations |
-| GET | `/annotations/:id` | Get annotation by ID |
-| POST | `/annotations` | Create new annotation |
-| PUT | `/annotations/:id` | Update annotation |
-| DELETE | `/annotations/:id` | Delete annotation |
+| Method | Endpoint           | Description           |
+| ------ | ------------------ | --------------------- |
+| GET    | `/annotations`     | List all annotations  |
+| GET    | `/annotations/:id` | Get annotation by ID  |
+| POST   | `/annotations`     | Create new annotation |
+| PUT    | `/annotations/:id` | Update annotation     |
+| DELETE | `/annotations/:id` | Delete annotation     |
 
 ### Request/Response Examples
 
 **Create Annotation**
+
 ```json
 POST /api/v1/annotations
 {
@@ -216,18 +221,19 @@ POST /api/v1/annotations
 ```
 
 **Response**
+
 ```json
 {
-  "data": {
-    "id": "uuid",
-    "x": 1.5,
-    "y": 2.5,
-    "z": 3.5,
-    "title": "Point of Interest",
-    "description": "Optional description",
-    "created_at": "2024-01-01T00:00:00Z",
-    "updated_at": "2024-01-01T00:00:00Z"
-  }
+    "data": {
+        "id": "uuid",
+        "x": 1.5,
+        "y": 2.5,
+        "z": 3.5,
+        "title": "Point of Interest",
+        "description": "Optional description",
+        "created_at": "2024-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z"
+    }
 }
 ```
 
@@ -235,42 +241,42 @@ POST /api/v1/annotations
 
 The service can be configured via environment variables or command-line flags:
 
-| Variable | Flag | Default | Description |
-|----------|------|---------|-------------|
-| `SERVICE_ROLE` | `-role` | `gateway` | Service role: `gateway` or `handler` |
-| `SERVER_PORT` | `-port` | `8080` | HTTP server port |
-| `HANDLER_URL` | - | `http://handler:8081` | Handler service URL (gateway mode only) |
-| `DATABASE_URL` | - | `postgres://...` | PostgreSQL connection string (handler mode only) |
-| `REDIS_URL` | - | `redis://redis:6379` | Redis connection string (handler mode only) |
-| `ENVIRONMENT` | - | `development` | Environment: `development` or `production` |
+| Variable       | Flag    | Default               | Description                                      |
+| -------------- | ------- | --------------------- | ------------------------------------------------ |
+| `SERVICE_ROLE` | `-role` | `gateway`             | Service role: `gateway` or `handler`             |
+| `SERVER_PORT`  | `-port` | `8080`                | HTTP server port                                 |
+| `HANDLER_URL`  | -       | `http://handler:8081` | Handler service URL (gateway mode only)          |
+| `DATABASE_URL` | -       | `postgres://...`      | PostgreSQL connection string (handler mode only) |
+| `REDIS_URL`    | -       | `redis://redis:6379`  | Redis connection string (handler mode only)      |
+| `ENVIRONMENT`  | -       | `development`         | Environment: `development` or `production`       |
 
 ### Docker Compose Services
 
-| Service | Container | Port | Health Check |
-|---------|-----------|------|--------------|
-| Frontend | `pca-frontend` | 3000 → 80 | - |
-| Gateway | `pca-gateway` | 8080 | HTTP check |
-| Handler | `pca-handler` | 8081 (internal) | HTTP check |
-| PostgreSQL | `pca-postgres` | 5432 | `pg_isready` |
-| Redis | `pca-redis` | 6379 | `redis-cli ping` |
+| Service    | Container      | Port            | Health Check     |
+| ---------- | -------------- | --------------- | ---------------- |
+| Frontend   | `pca-frontend` | 3000 → 80       | -                |
+| Gateway    | `pca-gateway`  | 8080            | HTTP check       |
+| Handler    | `pca-handler`  | 8081 (internal) | HTTP check       |
+| PostgreSQL | `pca-postgres` | 5432            | `pg_isready`     |
+| Redis      | `pca-redis`    | 6379            | `redis-cli ping` |
 
 ## How Annotations Work
 
 1. **Adding an Annotation:**
-   - Click the "Add Annotation" button in the toolbar
-   - Drag on the point cloud to position the marker
-   - Release to confirm placement
-   - Fill in the title and optional description in the dialog
-   - Click "Save" to persist to the database
+    - Click the "Add Annotation" button in the toolbar
+    - Drag on the point cloud to position the marker
+    - Release to confirm placement
+    - Fill in the title and optional description in the dialog
+    - Click "Save" to persist to the database
 
 2. **Viewing Annotations:**
-   - Annotations load automatically on page load
-   - Click on any annotation marker to expand it
-   - Use the "Refresh" button to reload from the server
+    - Annotations load automatically on page load
+    - Click on any annotation marker to expand it
+    - Use the "Refresh" button to reload from the server
 
 3. **Deleting Annotations:**
-   - Hover over an annotation to reveal the delete button (×)
-   - Click the delete button and confirm
+    - Hover over an annotation to reveal the delete button (×)
+    - Click the delete button and confirm
 
 ## Project Structure
 
@@ -362,20 +368,24 @@ make docker-clean
 ### Common Issues
 
 **Annotations not saving:**
+
 - Check that all Docker services are healthy: `docker compose ps`
 - View handler logs: `docker compose logs handler`
 - Verify database connectivity: `docker compose exec postgres psql -U postgres -d annotations -c "SELECT count(*) FROM annotations;"`
 
 **Point cloud not loading:**
+
 - Ensure Potree is properly set up in `.tmp/potree/`
 - Check browser console for 404 errors
 - Verify nginx is serving files: `curl -I http://localhost:3000/potree/build/potree/potree.js`
 
 **Icons/textures showing 404:**
+
 - The nginx config uses path rewrites for Potree resources
 - Restart frontend after config changes: `docker compose restart frontend`
 
 **Handler showing unhealthy:**
+
 - This can occur during startup while waiting for database
 - Check handler logs: `docker compose logs handler`
 - Verify database is ready: `docker compose logs postgres`
