@@ -161,6 +161,34 @@ The frontend is served by Nginx and consists of:
 
 ## Quick Start
 
+### Prerequisites
+
+- Docker and Docker Compose
+- Git (for cloning with submodules)
+- Node.js 18+ (only if rebuilding Potree)
+
+### Clone the Repository
+
+```bash
+# Clone with submodules
+git clone --recurse-submodules https://github.com/your-repo/poc-point-cloud-annotator.git
+
+# Or if already cloned without submodules
+git submodule update --init --recursive
+```
+
+### Build Potree (First Time Only)
+
+Potree needs to be built before running the application:
+
+```bash
+# Using Docker (recommended - no local Node.js required)
+docker run --rm -v "$(pwd)/libs/potree:/app" -w /app node:18-alpine sh -c "npm install && npm run build"
+
+# Or with local Node.js
+cd libs/potree && npm install && npm run build
+```
+
 ### Using Docker Compose (Recommended)
 
 ```bash
@@ -307,13 +335,15 @@ The service can be configured via environment variables or command-line flags:
 │   │   └── annotator.css        # Toolbar, dialog, and annotation styles
 │   ├── js/
 │   │   └── annotator.js         # ES module: API client, Potree integration
-│   └── nginx.conf               # Reverse proxy and path rewrite rules
-├── .tmp/
-│   └── potree/                  # Potree library (cloned from GitHub)
-│       ├── build/               # Built Potree viewer
+│   └── nginx.conf               # Reverse proxy configuration
+├── libs/
+│   └── potree/                  # Potree library (git submodule)
+│       ├── build/               # Built Potree viewer (generated)
 │       ├── libs/                # Dependencies (THREE.js, etc.)
 │       ├── pointclouds/         # Sample point cloud data
-│       └── resources/           # Icons, textures, translations
+│       ├── resources/           # Icons, textures, translations
+│       └── src/                 # Potree source code
+├── .gitmodules                  # Git submodule configuration
 ├── docker-compose.yml           # 5-service Docker Compose configuration
 ├── Makefile                     # Build, test, and Docker commands
 └── README.md                    # This file
@@ -374,15 +404,15 @@ make docker-clean
 - Verify database connectivity: `docker compose exec postgres psql -U postgres -d annotations -c "SELECT count(*) FROM annotations;"`
 
 **Point cloud not loading:**
-
-- Ensure Potree is properly set up in `.tmp/potree/`
+- Ensure Potree submodule is initialized: `git submodule update --init --recursive`
+- Ensure Potree is built: check that `libs/potree/build/` exists
+- Rebuild Potree if needed: `docker run --rm -v "$(pwd)/libs/potree:/app" -w /app node:18-alpine sh -c "npm install && npm run build"`
 - Check browser console for 404 errors
 - Verify nginx is serving files: `curl -I http://localhost:3000/potree/build/potree/potree.js`
 
 **Icons/textures showing 404:**
-
-- The nginx config uses path rewrites for Potree resources
-- Restart frontend after config changes: `docker compose restart frontend`
+- Ensure Potree is fully built (the build process copies resources)
+- Restart frontend after changes: `docker compose restart frontend`
 
 **Handler showing unhealthy:**
 

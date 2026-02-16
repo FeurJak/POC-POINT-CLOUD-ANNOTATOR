@@ -1,0 +1,3 @@
+[submodule "libs/potree"]
+	path = libs/potree
+	url = https://github.com/potree/potree.git

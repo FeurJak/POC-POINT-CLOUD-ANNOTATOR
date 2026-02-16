@@ -1,4 +1,4 @@
-.PHONY: all build test run clean docker-build docker-up docker-down help
+.PHONY: all build test run clean docker-build docker-up docker-down help potree-build submodule-init
 
 # Default target
 all: build
@@ -81,6 +81,22 @@ deps:
 	@cd backend && go mod download
 	@echo "Dependencies installed"
 
+# Initialize git submodules
+submodule-init:
+	@echo "Initializing git submodules..."
+	git submodule update --init --recursive
+	@echo "Submodules initialized"
+
+# Build Potree library (requires Docker or local Node.js)
+potree-build:
+	@echo "Building Potree library..."
+	@if [ ! -d "libs/potree/src" ]; then \
+		echo "Error: Potree submodule not initialized. Run 'make submodule-init' first."; \
+		exit 1; \
+	fi
+	docker run --rm -v "$$(pwd)/libs/potree:/app" -w /app node:18-alpine sh -c "npm install && npm run build"
+	@echo "Potree build complete"
+
 # Lint code
 lint:
 	@echo "Linting Go code..."
@@ -109,6 +125,10 @@ help:
 	@echo "Local Running (requires local postgres/redis):"
 	@echo "  make run-handler    - Run the handler service locally"
 	@echo "  make run-gateway    - Run the gateway service locally"
+	@echo ""
+	@echo "Setup:"
+	@echo "  make submodule-init - Initialize git submodules (Potree)"
+	@echo "  make potree-build   - Build Potree library (uses Docker)"
 	@echo ""
 	@echo "Docker:"
 	@echo "  make docker-build   - Build Docker images"
